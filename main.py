@@ -1,19 +1,19 @@
 from RSA import *
 
-valid = False
-while not(valid):
+print("")
+print("---")
+print("") 
 
-    print("")
-    print("---")
-    print("") 
+p = generatePrima()
+q = generatePrima()
 
-    p = int(input("Masukkan nilai p (bilangan prima): "))
-    q = int(input("Masukkan nilai q (bilangan prima): "))
+print("p yang didapatkan: " + str(p))
     
-    if (isPrima(p) and isPrima(q)):
-        valid = True
-    else:
-        print("p dan q harus merupakan bilangan prima")
+print("")
+print("---")
+print("") 
+
+print("q yang didapatkan: " + str(q))
     
 print("")
 print("---")
@@ -21,23 +21,27 @@ print("")
 
 n = p * q
 print("n yang didapatkan: " + str(n))
+print(len([i for i in str(n)]))
+
+print("")
+print("---")
+print("") 
 
 totient = (p - 1) * (q - 1)
 print("totient yang didapatkan: " + str(totient))
 
-valid = False
-while not(valid):
+while True:
 
     print("")
     print("---")
     print("") 
 
-    e = int(input("Masukkan nilai e (bilangan relatif prima dari totient): "))
+    e = generatePrima()
 
-    if (not(isFaktor(totient, e))):
-        valid = True
-    else:
-        print("e harus relatif prima terhadap totient")
+    if (totient % e != 0):
+        break
+
+print("e yang didapatkan: " + str(e))
 
 print("")
 print("---")
@@ -64,6 +68,10 @@ print("")
 print("---")
 print("")
 
+for i in cList:
+    if (n > i):
+        print("Safe")
+
 print("DEKRIPSI")
 m = dekripsi (cList, d, n)
 print("Hasil dekripsi: " + str(m))
@@ -71,3 +79,17 @@ print("Hasil dekripsi: " + str(m))
 print("")
 print("---")
 print("")
+
+print(pow(253, 1019, 3337))
+print(pow(1619, 1019, 3337))
+print(pow(3096, 1019, 3337))
+print(pow(165, 1019, 3337))
+print(pow(26, 1019, 3337))
+print(pow(442, 1019, 3337))
+print('')
+print(pow(792, 1019, 3337))
+print(pow(772, 1019, 3337))
+print(pow(705, 1019, 3337))
+print(pow(299, 1019, 3337))
+print(pow(46, 1019, 3337))
+print(pow(1600, 1019, 3337))

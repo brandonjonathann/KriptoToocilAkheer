@@ -17,6 +17,9 @@ def binaryXORFunction(x, y):
     result = ''.join(tmp)
     return result
 
+def permutationFunctionTheta(sTmp):
+    return 0
+
 n = "The quick brown fox jumps over the lazy dog"
 p = stringToBinary(n)
 
@@ -51,13 +54,15 @@ for i in range(5):
     tmp = []
     for j in range(5):
         for k in range(8):
-            tmp.append('11111111')
+            tmp.append('00000000')
     s.append(tmp)
 
 for i in range(len(pBreak)):
     for j in range(int(448 / 8)):
         pBreak[i].append('00000000')
-    tmp = []
-    for j in range(len(pBreak[i])):
-        tmp.append(binaryXORFunction(pBreak[i][j], s[j // 40][j % 40]))
-    
+    tmp1 = []
+    for j in range(5):
+        tmp2 = []
+        for k in range(int(len(pBreak[i]) / 5)):
+            tmp2.append(binaryXORFunction(pBreak[i][int(j * len(pBreak[i]) / 5 + k)], s[j][k]))
+        tmp1.append(tmp2)
