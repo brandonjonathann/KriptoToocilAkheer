@@ -35,6 +35,8 @@ def lowLevelPrime():
         for i in primaDibawah1000:
             if (x % i == 0):
                 factor = True
+            elif (x <= i):
+                factor = True
         if not(factor):
             return x 
 
@@ -70,78 +72,34 @@ def generatePrima():
         if isMillerRabinPassed(x):
             return x
 
-# Mencari d yang bulat berdasarkan k
+# Mencari d berdasarkan nilai e dan totient
 def cariD(totient, e):
-    k = 1
-    found = False
-    while not(found):
-        d = (1 + (k * totient)) / e
-        if (d % 1 == 0):
-            print(d % 1)
-            print(d)
-            d = int(d)
-            return d
-        else:
-            k += 1
+    return pow(e, -1, totient)
 
 # Proses enkripsi
 def enkripsi(m, e, n):
 
-    # Plaintext diubah menjadi array of integer yang merupakan urutan
-    # ASCII masing-masing karakter
-    mList = [ord(i) for i in m]
-    print(mList)
+    # Mengubah m yang merupakan hasil hashing SHA3-256 berupa hexadecimal menjadi decimal
+    m = int(m, 16)
 
-    # # Dilakukan penambahan spasi jika jumlah karakter tidak bulat
-    # if (len(mList) % 2 != 0):
-    #     mList.append(32)
-    # print(mList)
+    # Mengenkripsi message dalam bentuk decimal menjadi ciphertext
+    c = pow(m, e, n)
 
-    # Melakukan pengelompokkan menjadi blok-blok dengan ukuran yang sama
-    mBlock = []
-    for i in range (int(len(mList) / 2)):
-        mBlock.append((mList[2 * i] * 1000) + (mList[2 * i + 1]))
-    print(mBlock)
+    # Menghasilkan ciphertext dalam bentuk hexadecimal seperti pada contoh
+    c = hex(c)
 
-    # Blok-blok dienkripsi menjadi blok-blok ciphertext
-    c = []
-    for i in range (len(mBlock)):
-        c.append(pow(mBlock[i], e, n))
-    print(c)
     return c
 
 # Proses dekripsi
 def dekripsi(c, d, n):
     
-    # Blok-blok ciphertext didekripsi menjadi blok-blok integer
-    print(c)
-    mBlock = []
-    for i in range (len(c)):
-        mBlock.append(pow(c[i], d, n))
-    print(mBlock)
-
-    # Blok-blok integer dipecah ke bentuk semula
-    mList = []
-    for i in range(len(mBlock)):
-        tmp = mBlock[i] // 1000
-        mList.append(tmp)
-        mList.append(mBlock[i] - (tmp * 1000))
-    print(mList)
+    # Mengubah ciphertext dari bentuk hexadecimal menjadi decimal
+    c = int(c, 16)
     
-    # Melakukan pengecekan elemen terakhir,
-    # Bila elemen terakhir berupa spasi, elemen tersebut dibuang
-    print(mList[len(mList) - 1])
-    if (mList[len(mList) - 1] == 32):
-        mList.pop()
-    print(mList)
+    # Mendekripsi ciphertext menjadi decimal
+    m = pow(c, d, n)
 
-    # Melakukan pengubahan urutan angka menjadi karakter semula
-    tmp = []
-    for i in range (len(mList)):
-        tmp.append(chr(mList[i]))
-    print(tmp)
+    # Mengubah decimal menjadi bentuk hexadecimal
+    m = hex(m)
 
-    # Array of char digabungkan menjadi pesan yang telah didekripsi
-    m = ''.join(tmp)
-    print(m)
     return m
