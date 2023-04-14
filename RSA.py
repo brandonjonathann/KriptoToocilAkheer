@@ -86,7 +86,7 @@ def enkripsi(m, e, n):
     c = pow(m, e, n)
 
     # Menghasilkan ciphertext dalam bentuk hexadecimal seperti pada contoh
-    c = hex(c)
+    c = hex(c)[2:]
 
     return c
 
