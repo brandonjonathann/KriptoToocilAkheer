@@ -75,7 +75,6 @@ class GenKey(QMainWindow):
                 x = msg.exec_()
 
 class DigitalSign(QMainWindow):
-
     namefile = ''
     prifile = ''
 
@@ -88,6 +87,8 @@ class DigitalSign(QMainWindow):
         self.pushButton_13.clicked.connect(self.PopUpSign)
     
     def Menu(self):
+        DigitalSign.namefile = ''
+        DigitalSign.prifile = ''
         menu = Menu()
         widget.addWidget(menu)
         widget.setCurrentIndex(widget.currentIndex() + 1)
@@ -132,13 +133,13 @@ class DigitalSign(QMainWindow):
                     e = int(key[1])
                     n = int(key[0])
 
-                with open("%s.txt" % (pathlib.Path(DigitalSign.namefile).stem), "r+") as f:                
-                    tmp = (f.read())
-                    tmp = enkripsi(hash(tmp), e, n)
+                with open(DigitalSign.namefile, "r") as f:                
+                    tmp = f.read()
+                    ds = enkripsi(hash(tmp), e, n)
 
                 with open('%s.txt' % (pathlib.Path(DigitalSign.namefile).stem), "a") as file:
                     file.write("\n<ds>")
-                    file.write(tmp)
+                    file.write(ds)
                     file.write("</ds>")
                     file.close()
 
@@ -195,6 +196,9 @@ class SignVerif(QMainWindow):
         self.pushButton_14.clicked.connect(self.PopUpVerif)
 
     def Menu(self):
+        SignVerif.namefile = ''
+        SignVerif.pubfile = ''
+        SignVerif.signfile = ''
         menu = Menu()
         widget.addWidget(menu)
         widget.setCurrentIndex(widget.currentIndex() + 1)
@@ -262,13 +266,13 @@ class SignVerif(QMainWindow):
                         d = int(key[1])
                         n = int(key[0])
 
-                    with open("%s.txt" % (pathlib.Path(SignVerif.namefile).stem), "rb") as f:                
-                        tmp = str(f.read(), 'utf-8')
-                        x = tmp.find('<ds>')
+                    with open("%s.txt" % (pathlib.Path(SignVerif.namefile).stem), "r") as f:     
+                        tmp = f.read()
+                        x = tmp.find('\n<ds>')
                         y = tmp.find('</ds>')
-                        signature = tmp[x + 4:y]
-                        message = tmp[0:x - 2]
-
+                        signature = tmp[x + 5:y]
+                        message = tmp[0:x]
+                        
                         messageHash = hash(message)
                         signatureDecrypt = dekripsi(signature, d, n)
                         if (messageHash == signatureDecrypt):
