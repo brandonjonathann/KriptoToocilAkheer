@@ -8,3 +8,6 @@ call myenv\Scripts\activate.bat
 
 REM Install the required libraries from requirements.txt
 pip install -r requirements.txt
+
+REM Run the program
+python main.py
