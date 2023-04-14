@@ -15,6 +15,7 @@ import csv
 import datetime
 import random
 import pathlib
+import string
 
 class Menu(QMainWindow):
     def __init__(self):
@@ -72,10 +73,6 @@ class GenKey(QMainWindow):
                 msg.setText("Nama File Sudah Ada, Silahkan Masukan Nama File Lain ataupun Hapus File Sebelumnya")
                 msg.setIcon(QMessageBox.Warning)
                 x = msg.exec_()
-        # Warning
-        # Critical
-        # Information
-        # Question
 
 class DigitalSign(QMainWindow):
 
@@ -128,33 +125,59 @@ class DigitalSign(QMainWindow):
             msg.setIcon(QMessageBox.Warning)
             x = msg.exec_()
         else:
-            with open("%s.pri" % (pathlib.Path(DigitalSign.prifile).stem), "rb") as rp:
-                tmp = rp.read()
-                key = str(tmp, 'utf-8').split(',')
-                e = int(key[1])
-                n = int(key[0])
+            if (pathlib.Path(DigitalSign.namefile).suffix == ".txt"):
+                with open("%s.pri" % (pathlib.Path(DigitalSign.prifile).stem), "rb") as rp:
+                    tmp = rp.read()
+                    key = str(tmp, 'utf-8').split(',')
+                    e = int(key[1])
+                    n = int(key[0])
 
-            with open("%s.txt" % (pathlib.Path(DigitalSign.namefile).stem), "r+") as f:                
-                tmp = (f.read())
-                tmp = enkripsi(hash(tmp), e, n)
+                with open("%s.txt" % (pathlib.Path(DigitalSign.namefile).stem), "r+") as f:                
+                    tmp = (f.read())
+                    tmp = enkripsi(hash(tmp), e, n)
 
-            with open('%s.txt' % (pathlib.Path(DigitalSign.namefile).stem), "a") as file:
-                file.write("\n<ds>")
-                file.write(tmp)
-                file.write("</ds>")
-                file.close()
+                with open('%s.txt' % (pathlib.Path(DigitalSign.namefile).stem), "a") as file:
+                    file.write("\n<ds>")
+                    file.write(tmp)
+                    file.write("</ds>")
+                    file.close()
 
-            msg = QMessageBox()
-            msg.setWindowTitle("Notification")
-            msg.setText("File Berhasil Di-sign")
-            msg.setIcon(QMessageBox.Information)
-            x = msg.exec_()
+                msg = QMessageBox()
+                msg.setWindowTitle("Notification")
+                msg.setText("File Berhasil Di-sign")
+                msg.setIcon(QMessageBox.Information)
+                x = msg.exec_()
+            else:
+                with open("%s.pri" % (pathlib.Path(DigitalSign.prifile).stem), "rb") as rp:
+                    tmp = rp.read()
+                    key = str(tmp, 'utf-8').split(',')
+                    e = int(key[1])
+                    n = int(key[0])
 
-        # Warning
-        # Critical
-        # Information
-        # Question
+                bytes = []
+                with open(DigitalSign.namefile, 'rb') as f:
+                    while True:
+                        byte = f.read(1)
+                        if not byte:
+                            break
+                        bytes.append(int.from_bytes(byte, byteorder='big'))
+                text = ''
+                for i in range (len(bytes)):
+                    text += chr(bytes[i])
+                
+                tmp = enkripsi(hash(text), e, n)
 
+                name = QFileDialog.getSaveFileName(self, "Save File", "", "Text files (*.txt)")
+            
+                with open('%s.txt' % (pathlib.Path(name[0]).stem), 'w') as f:
+                    f.write(tmp)
+                f.close()
+
+                msg = QMessageBox()
+                msg.setWindowTitle("Notification")
+                msg.setText("File Berhasil Di-sign")
+                msg.setIcon(QMessageBox.Information)
+                x = msg.exec_()
 
 class SignVerif(QMainWindow):
 
@@ -208,7 +231,14 @@ class SignVerif(QMainWindow):
 
     def ReadSignKeyFile(self):
         fname = QFileDialog.getOpenFileName(self, "Choose File")
-        return (fname[0])
+        if (pathlib.Path(fname[0]).suffix == ".txt"):
+            return (fname[0])
+        else:
+            msg = QMessageBox()
+            msg.setWindowTitle("Notification")
+            msg.setText("Masukan File dengan Format .txt")
+            msg.setIcon(QMessageBox.Warning)
+            x = msg.exec_()
 
     def PopUpVerif(self):
         if (SignVerif.namefile == '' or SignVerif.pubfile == ''):
@@ -254,11 +284,57 @@ class SignVerif(QMainWindow):
                             msg.setIcon(QMessageBox.Critical)
                             x = msg.exec_()
             else:
-                print('x')
-        # Warning
-        # Critical
-        # Information
-        # Question
+                if (SignVerif.signfile == ''):
+                    msg = QMessageBox()
+                    msg.setWindowTitle("Notification")
+                    msg.setText("Masukkan Signed File untuk File Selain .txt!")
+                    msg.setIcon(QMessageBox.Question)
+                    x = msg.exec_()
+                else:
+                    with open("%s.pub" % (pathlib.Path(SignVerif.pubfile).stem), "rb") as rp:
+                        tmp = rp.read()
+                        key = str(tmp, 'utf-8').split(',')
+                        d = int(key[1])
+                        n = int(key[0])
+
+                    with open("%s.txt" % (pathlib.Path(SignVerif.signfile).stem), "rb") as file:                
+                        signature = str(file.read(), 'utf-8')
+
+                    temp = all(c in string.hexdigits for c in signature) # Memastikan bahwa signed file berbentuk hexadecimal
+
+                    if (temp):
+                        bytes = []
+                        with open(SignVerif.namefile, 'rb') as f:
+                            while True:
+                                byte = f.read(1)
+                                if not byte:
+                                    break
+                                bytes.append(int.from_bytes(byte, byteorder='big'))
+                        text = ''
+                        for i in range (len(bytes)):
+                            text += chr(bytes[i])
+
+                        messageHash = hash(text)
+                        signatureDecrypt = dekripsi(signature, d, n)
+
+                        if (messageHash == signatureDecrypt):
+                            msg = QMessageBox()
+                            msg.setWindowTitle("Notification")
+                            msg.setText("File dan Digital Signature Terverifikasi")
+                            msg.setIcon(QMessageBox.Information)
+                            x = msg.exec_()
+                        else:
+                            msg = QMessageBox()
+                            msg.setWindowTitle("Notification")
+                            msg.setText("File Bukan merupakan File Original, Coba Cek File ataupun Key Kembali")
+                            msg.setIcon(QMessageBox.Critical)
+                            x = msg.exec_()
+                    else:
+                        msg = QMessageBox()
+                        msg.setWindowTitle("Notification")
+                        msg.setText("Signed File yg Dimasukkan Salah")
+                        msg.setIcon(QMessageBox.Critical)
+                        x = msg.exec_()
 
 # main
 app = QApplication(sys.argv)
