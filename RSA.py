@@ -70,11 +70,16 @@ def generatePrima():
     while True:
         x = lowLevelPrime()
         if isMillerRabinPassed(x):
+            print("\nprima:", x)
             return x
 
 # Mencari d berdasarkan nilai e dan totient
 def cariD(totient, e):
-    return pow(e, -1, totient)
+    print("\ntotient:", e)
+    print("\ne:", e)
+    d = pow(e, -1, totient)
+    print("\nd: ", d)
+    return d
 
 # Proses enkripsi
 def enkripsi(m, e, n):
