@@ -6,12 +6,15 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QPixmap
 
 from RSA import *
+from function import *
+from SHA3 import *
 
 import sqlite3
 import os
 import csv
 import datetime
 import random
+import pathlib
 
 class Menu(QMainWindow):
     def __init__(self):
@@ -57,17 +60,28 @@ class GenKey(QMainWindow):
             msg.setIcon(QMessageBox.Warning)
             x = msg.exec_()
         else:
-            msg = QMessageBox()
-            msg.setWindowTitle("Notification")
-            msg.setText("File Public dan Private Key Berhasil Tersimpan")
-            msg.setIcon(QMessageBox.Information)
-            x = msg.exec_()
+            if (writeKey(namaFile)):
+                msg = QMessageBox()
+                msg.setWindowTitle("Notification")
+                msg.setText("File Public dan Private Key Berhasil Tersimpan")
+                msg.setIcon(QMessageBox.Information)
+                x = msg.exec_()
+            else:
+                msg = QMessageBox()
+                msg.setWindowTitle("Notification")
+                msg.setText("Nama File Sudah Ada, Silahkan Masukan Nama File Lain ataupun Hapus File Sebelumnya")
+                msg.setIcon(QMessageBox.Warning)
+                x = msg.exec_()
         # Warning
         # Critical
         # Information
         # Question
 
 class DigitalSign(QMainWindow):
+
+    namefile = ''
+    prifile = ''
+
     def __init__(self):
         super(DigitalSign, self).__init__()
         loadUi("digitalsign.ui", self)
@@ -82,24 +96,65 @@ class DigitalSign(QMainWindow):
         widget.setCurrentIndex(widget.currentIndex() + 1)
 
     def AddFile(self):
-        print("Ayo Clubbing")
+        text = self.ReadFile()
+        print(text)
+        self.textBrowser.setPlainText(text)
+        DigitalSign.namefile = text
 
     def AddPrivKeyFile(self):
-        print("Ayo Clubbing")
+        text = self.ReadPrivKeyFile()
+        self.textBrowser_2.setPlainText(text)
+        DigitalSign.prifile = text
+
+    def ReadFile(self):
+        fname = QFileDialog.getOpenFileName(self, "Choose File")
+        return (fname[0])
+    
+    def ReadPrivKeyFile(self):
+        fname = QFileDialog.getOpenFileName(self, "Choose File")
+        if (pathlib.Path(fname[0]).suffix == ".pri"):
+            return (fname[0])
+        else:
+            msg = QMessageBox()
+            msg.setWindowTitle("Notification")
+            msg.setText("Masukan File dengan Format .pri")
+            msg.setIcon(QMessageBox.Warning)
+            x = msg.exec_()
 
     def PopUpSign(self):
-        msg = QMessageBox()
-        msg.setWindowTitle("Notification")
-        msg.setText("Bla bla bla")
-        msg.setIcon(QMessageBox.Critical)
+        if (DigitalSign.namefile == '' or DigitalSign.prifile == ''):
+            msg = QMessageBox()
+            msg.setWindowTitle("Notification")
+            msg.setText("Masukan File ataupun Private Key File yang Masih Kosong")
+            msg.setIcon(QMessageBox.Warning)
+            x = msg.exec_()
+        else:
+            # BELOM ANJING
+            with open("%s.pri" % (pathlib.Path(DigitalSign.prifile).stem), "rb") as rp:
+                tmp = rp.read()
+                key = str(tmp, 'utf-8').split(',')
+                e = int(key[1])
+                n = int(key[0])
+
+            with open("%s.txt" % (pathlib.Path(DigitalSign.namefile).stem), "r+") as f:
+                tmp = (f.read())
+                tmp = enkripsi(hash(tmp), e, n)
+
+            with open('%s.txt' % (pathlib.Path(na).stem), "a") as file:
+                f.write(text)
+            f.close()
         # Warning
         # Critical
         # Information
         # Question
 
-        x = msg.exec_()
 
 class SignVerif(QMainWindow):
+
+    namefile = ''
+    pubfile = ''
+    signfile = ''
+
     def __init__(self):
         super(SignVerif, self).__init__()
         loadUi("signverif.ui", self)
@@ -115,13 +170,38 @@ class SignVerif(QMainWindow):
         widget.setCurrentIndex(widget.currentIndex() + 1)
 
     def AddFile(self):
-        print("Ayo Clubbing")
+        text = self.ReadFile()
+        self.textBrowser.setPlainText(text)
+        namefile = text
 
     def AddPubKeyFile(self):
-        print("Ayo Clubbing")
+        text = self.ReadPubKeyFile()
+        self.textBrowser_2.setPlainText(text)
+        pubfile = text
 
     def AddSignedFile(self):
-        print("Ayo Clubbing")
+        text = self.ReadSignKeyFile()
+        self.textBrowser_3.setPlainText(text)
+        signfile = text
+
+    def ReadFile(self):
+        fname = QFileDialog.getOpenFileName(self, "Choose File")
+        return (fname[0])
+    
+    def ReadPrivKeyFile(self):
+        fname = QFileDialog.getOpenFileName(self, "Choose File")
+        if (pathlib.Path(fname[0]).suffix == ".pub"):
+            return (fname[0])
+        else:
+            msg = QMessageBox()
+            msg.setWindowTitle("Notification")
+            msg.setText("Masukan File dengan Format .pub")
+            msg.setIcon(QMessageBox.Warning)
+            x = msg.exec_()
+
+    def ReadSignKeyFile(self):
+        fname = QFileDialog.getOpenFileName(self, "Choose File")
+        return (fname[0])
 
     def PopUpVerif(self):
         msg = QMessageBox()
