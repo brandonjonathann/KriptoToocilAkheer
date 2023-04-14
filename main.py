@@ -232,25 +232,27 @@ class SignVerif(QMainWindow):
                         d = int(key[1])
                         n = int(key[0])
 
-                    with open("%s.txt" % (pathlib.Path(SignVerif.namefile).stem), "r+") as f:                
-                        tmp = (f.read())
-                        tmp2 = str(tmp, 'utf-8').split('\n<ds>')
-                        print(tmp2)
+                    with open("%s.txt" % (pathlib.Path(SignVerif.namefile).stem), "rb") as f:                
+                        tmp = str(f.read(), 'utf-8')
+                        x = tmp.find('<ds>')
+                        y = tmp.find('</ds>')
+                        signature = tmp[x + 4:y]
+                        message = tmp[0:x - 2]
 
-
-                        tmp = dekripsi(hash(tmp), d, n)
-
-                    with open('%s.txt' % (pathlib.Path(DigitalSign.namefile).stem), "a") as file:
-                        file.write("\n<ds>")
-                        file.write(tmp)
-                        file.write("</ds>")
-                        file.close()
-
-                    msg = QMessageBox()
-                    msg.setWindowTitle("Notification")
-                    msg.setText("File Berhasil Di-sign")
-                    msg.setIcon(QMessageBox.Information)
-                    x = msg.exec_()
+                        messageHash = hash(message)
+                        signatureDecrypt = dekripsi(signature, d, n)
+                        if (messageHash == signatureDecrypt):
+                            msg = QMessageBox()
+                            msg.setWindowTitle("Notification")
+                            msg.setText("File dan Digital Signature Terverifikasi")
+                            msg.setIcon(QMessageBox.Information)
+                            x = msg.exec_()
+                        else:
+                            msg = QMessageBox()
+                            msg.setWindowTitle("Notification")
+                            msg.setText("File Bukan merupakan File Original, Coba Cek File ataupun Key Kembali")
+                            msg.setIcon(QMessageBox.Critical)
+                            x = msg.exec_()
             else:
                 print('x')
         # Warning

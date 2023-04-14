@@ -100,6 +100,6 @@ def dekripsi(c, d, n):
     m = pow(c, d, n)
 
     # Mengubah decimal menjadi bentuk hexadecimal
-    m = hex(m)
+    m = hex(m)[2:]
 
     return m
